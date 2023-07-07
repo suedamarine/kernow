@@ -33,3 +33,23 @@ pdf("plots/feed_plot.pdf",
 feed.plot
 dev.off()
 
+
+# clear water feed rate
+feed.cw <- read.csv("data/feed_cw.csv")
+
+feed.cw %>% ggplot(aes(mass, prop_feed)) +
+  geom_point()
+
+feed.cw.twinlog <- lm(log(prop_feed) ~ log(mass), data = feed.cw)
+summary(feed.cw.twinlog)
+
+feed.cw.plot <- feed.cw %>%
+  ggplot(aes(mass, prop_feed)) +
+  geom_point() +
+  stat_function(fun = function(x) exp(feed.cw.twinlog$coefficients[1]) * x ^ feed.cw.twinlog$coefficients[2],
+                color = "orange",
+                xlim = c(0.1, 25),
+                alpha = 0.4) +
+  labs(x = "Shrimp bodyweight (g)",
+       y = "Feed as a proportion of bodyweight (%)") +
+  theme_minimal()

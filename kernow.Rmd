@@ -1,0 +1,1247 @@
+---
+title: "Kernow Crusty Crustaceans"
+author: "AES Technical"
+date: "`r Sys.Date()`"
+output:
+  bookdown::word_document2:
+     fig_caption: yes
+     number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r libraries}
+# import libraries
+library(tidyverse)
+library(broom)
+library(flextable)
+library(kableExtra)
+library(officer)
+library(knitr)
+```
+
+
+# Deliverables:
+
+Develop strategy for configuration of pilot study system with potential to be scaled up to appropriate commercial facility - scalable model.
+
+Desk study deliverables:
+
+Overview
+
+Market dynamics relevant to UK sector:
+
+* UK demand volume
+* Size range of product
+* Retail, wholesale and farm-gate price
+
+Summarise production methods:
+
+* Extensive pond
+* Hybrid biofloc
+* Clearwater RAS
+
+Develop production plan:
+
+* Growth model
+* Define production targets (pilot/ commercial)
+* Determine cycle/ batch duration
+* Define production strategy (life stages)
+* Define systems configuration in accordance with life stages
+* Determine stocking density
+* Configure tank array
+
+Biological considerations:
+
+* Water quality parameters
+* Husbandry
+* Diseases
+* Biosecurity
+
+System design:
+
+* Digitise production plan
+* System loading
+* Batch analysis
+* Mass balance calculations
+
+***
+
+## Overview
+
+A greater understanding of the biology of Litopenaeus vannamei led to its commercial culture from the early 1980’s. Production volumes have been continually increasing since this time and were estimated at approximately 2.37MT as of 2015 with global demand estimated at 5MT (Andhika Rakhmanda et al. 2021). Annual growth rate 8.78% (FAO 2020). The main producers are situated in Asia, USA, Central America and South America. A variety of farming techniques have been utilised for the culture of Litopenaeus vannamei and research is ongoing to further improve the industry.
+
+### Market dynamics relevant to UK sector
+
+Pacific white shrimp market size range: 20-100 pieces per kilo, majority is 40-100 pieces per kilo.
+Size designation frequently given in individuals per pound as follows:
+16/20 (22.7- 28.4g), 21/25 (18.2 - 21.6g), 26/30 (15.1 - 17.5g), 31/40 (11.4 - 14.6g), 41/50 (9.1 - 11.1g) 
+Example retailers: seamark.co.uk, jjfoodservice.com
+
+Greater size commands higher price.
+
+EU imports have the following classification codes HS 03061792 (Frozen Penaeus shrimp - only one processing step, freezing), HS 160521 (Shrimps and prawns not in airtight containers ), HS 160529 (Shrimps and prawns in airtight containers).
+
+2016-2019 data: 
+HS 03061792; 250k tonnes < imports < 300k tonnes per annum
+HS 160521; ~ 50k tonnes per annum
+HS 160529; ~ 50k tonnes per annum
+
+France and Spain imported ~ 70k tonnes each of pacific white shrimp code HS 03061792 in 2019
+UK and The Netherlands imported ~ 25k tonnes each of both pacific white shrimp code HS 0306192 and HS 160521/ 29 in 2019
+
+Spanish market is demanding - typically supplied from South and Central America. Colour (A2 - A4), size (20-60 pc/kg).
+
+***
+
+# Production methods
+
+Ongrowing techniques classified as: 
+
+Extensive; pond culture 5-10 ha, often tidal, minimal or no aeration, natural food supplemented by fertilisation, once-daily feeding low protein feed, 150-500 kg/ha/crop.
+
+Semi-intensive; pond culture 1-5 ha, minimal aeration, water exchange by pumping, natural food supplemented by fertilisation, 2-3 daily feeds of formulated diet, 500 - 2000 kg/ha/crop.
+
+Intensive; lined ponds 0.1-1.0 ha, heavy aeration 1 HP/ 400-600kg shrimp, 4-5 feeds daily of formulated diet, 30-35,000 kg/ha/crop.
+
+Intensive bacterial-floc ponds; 0.07 - 1.6 ha, flocs supplement formulated feed, 8-50,000 kg/ha/crop.
+Super-intensive; enclosed raceway systems/ tanks, high initial stocking density 300-450 0.5-2g juveniles/ sq.m, 28,000-68,000 kg/ha/crop.
+
+When considering production strategies of Litopenaeus vannamei within the UK, super-intensive systems are the only practically viable strategies when considering costs associated with land use  and energy requirements for maintaining suitable culture conditions. 
+
+High stocking densities associated with super-intensive shrimp culture require active management of water quality to maintain parameters within a suitable range, thus promoting desired growth rates and maintaining good health status of the livestock.
+
+The two production strategies considered here include biofloc and clear-water RAS systems.
+
+Biofloc (BF) and clear-water recirculating aquaculture systems (CW) are both closed aquaculture systems that enhance biosecurity and have low water exchange regimes in contrast to pond or flow-through systems. 
+
+These systems are typically maintained indoors and with a smaller footprint than extensive production systems, may be located closer to markets/ consumers.
+
+The primary difference between BF and CW cultivation methodologies is the management of ammonia removal (a metabolic waste product) by distinct bacterial pathways:
+
+BF cultivation systems predominantly rely on heterotrophic bacterial communities to sequester ammonia-N, this process occurs within the livestock tanks, is promoted by the addition of an organic carbon source, results in the production of bacterial flocs and is characterised by high solids (TSS) within the water column.
+
+CW cultivation systems rely on chemoautotrophic bacterial communities that collectively oxidise ammonia-N through two steps with the end product being nitrate-N. This process is enhanced by the provision of additional surface area for colonisation of the bacteria. Typically, specific bioreactor chambers containing biomedia are linked to the livestock tanks. Culture water is continuously circulated from the livestock tanks, through the bioreactor, and may pass through other processing steps for solids removal, sterilisation and oxygenation.
+
+Research indicates that CW systems may offer advantages over BF systems. These include:
+a lower feed conversion ratio (1.5 vs 1.8), higher growth rates, a more stable water quality environment, reduced solids production.
+
+Summary for systems management - CW has greater emphasis on systems maintenance whilst BF has greater emphasis on maintaining optimal conditions for bacterial communities (both operating systems would have similar husbandry requirements for the livestock).  
+
+CW systems have higher start-up costs due to the additional system components - detailed economic analysis required for comparative purposes.
+
+***
+\newpage
+
+# Production Plan
+
+## Growth Model
+
+``` {r growthModelGrowout}
+
+# import data
+growout.model <- read.csv("data/shrimp_growth.csv") %>%
+  mutate(wt.mid = (initial + final) / 2,
+         geometric.mid = sqrt(initial * final),
+         g.gain.day = (final - initial) / days)
+
+# define parameters
+bw.1 <- 0.788
+bw.20 <- 20
+bw.25 <- 25
+
+
+# run a couple of models to see how relationship looks between arithmetic mean mass and geometric mean 
+# arithmetic mean of bodyweight between weighings
+shrimp.fit.twinlog <- lm(log(g.gain.day) ~ log(wt.mid),
+                         data = growout.model)
+
+# calculate coefficients for growth curve bw_1 = [bw_0^c_1 + c_2 * days]^c_4
+c_1 <- 1 - shrimp.fit.twinlog$coefficients[2]
+c_2 <- c_1 * exp(shrimp.fit.twinlog$coefficients[1])
+c_4 <- 1 / c_1
+
+# perform the log-log relationship for geometric weight
+shrimp.geometric.twinlog <- lm(log(g.gain.day) ~ log(geometric.mid),
+                               data = growout.model)
+
+# calculate coefficients for growth curve bw_1 = [bw_0^c_1 + c_2 * days]^c_4
+geometric_c_1 <- 1 - shrimp.geometric.twinlog$coefficients[2]
+geometric_c_2 <- geometric_c_1 * exp(shrimp.geometric.twinlog$coefficients[1])
+geometric_c_4 <- 1 / geometric_c_1
+
+bodyweight.growout <- tibble(day = seq(0,180,1)) %>%
+  mutate(arithmetic_bw = (bw.1^c_1 + c_2 * day)^c_4,
+         geometric_bw = (bw.1^geometric_c_1 + geometric_c_2 * day)^geometric_c_4) %>%
+  pivot_longer(c(arithmetic_bw, geometric_bw), names_to = "model", values_to = "bw") %>%
+  filter(model == "arithmetic_bw")
+
+growout_plot <- bodyweight.growout %>%
+  filter(model == "arithmetic_bw") %>%
+  ggplot(aes(day, bw)) +
+  geom_line() +
+  xlim(0, 150) +
+  xlab("Days") +
+  ylab("Mass (g)") +
+  theme_minimal()
+
+```
+
+``` {r growthModelNursery}
+
+# perform similar calculations for nursery stages
+# import data
+nursery.model <- read.csv("data/pl_growth.csv") %>%
+  mutate(wt.mid = (initial + final) / 2,
+         geometric.mid = sqrt(initial * final),
+         g.gain.day = (final - initial) / days)
+
+# define parameters
+bw.0 <- 0.02
+
+# run a couple of models to see how relationship looks between arithmetic mean mass and geometric mean 
+# arithmetic mean of bodyweight between weighings
+nursery.fit.twinlog <- lm(log(g.gain.day) ~ log(wt.mid),
+                         data = nursery.model)
+
+# calculate coefficients for growth curve bw_1 = [bw_0^c_1 + c_2 * days]^c_4
+c_1_nursery <- 1 - nursery.fit.twinlog$coefficients[2]
+c_2_nursery <- c_1_nursery * exp(nursery.fit.twinlog$coefficients[1])
+c_4_nursery <- 1 / c_1_nursery
+
+# perform the log-log relationship for geometric weight
+nursery.geometric.twinlog <- lm(log(g.gain.day) ~ log(geometric.mid),
+                               data = nursery.model)
+
+# calculate coefficients for growth curve bw_1 = [bw_0^c_1 + c_2 * days]^c_4
+geometric_c_1_nursery <- 1 - nursery.geometric.twinlog$coefficients[2]
+geometric_c_2_nursery <- geometric_c_1_nursery * exp(nursery.geometric.twinlog$coefficients[1])
+geometric_c_4_nursery <- 1 / geometric_c_1_nursery
+
+bodyweight.nursery <- tibble(day = seq(0,56,1)) %>%
+  mutate(arithmetic_bw = (bw.0^c_1_nursery + c_2_nursery * day)^c_4_nursery) 
+
+nursery_plot <- bodyweight.nursery %>%
+  ggplot(aes(day, arithmetic_bw)) +
+  geom_line() +
+  xlim(0, 50) +
+  xlab("Days") +
+  ylab("Mass (g)") +
+  theme_minimal()
+```
+
+``` {r keyBodyWeights}
+
+# find when key bodyweights are attained
+shrimp.0.5g <- ceiling(which(abs(bodyweight.nursery$arithmetic_bw - bw.1) == min(abs(bodyweight.nursery$arithmetic_bw - bw.1))))
+shrimp.25g <- ceiling(which(abs(bodyweight.growout$bw - bw.25) == min(abs(bodyweight.growout$bw - bw.25)))) + shrimp.0.5g
+shrimp.20g <- ceiling(which(abs(bodyweight.growout$bw - bw.20) == min(abs(bodyweight.growout$bw - bw.20)))) + shrimp.0.5g
+```
+
+
+Data have been collected from academic literature sources and added to with industry data where available. 
+
+Two separate growth models have been developed to cover the size ranges of PL-12 to 25g. It is envisaged that they provide finer detail for development of system stages.
+
+``` {r GrowthModelPlotNursery, fig.cap = "Estimation of growth of Litopeneaus vannamei; 0.02 - 0.1g", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+nursery_plot
+```
+
+``` {r GrowthModelPlotGrowout, fig.cap = "Estimation of growth of Litopeneaus vannamei; 0.5 - 30g", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+growout_plot
+```
+
+
+These models closely follow data provided in the literature (Ray et al. 2017. PL-12 - 11.5g 85 days, Suantika et al. 2020. PL-10 - 12g 90 days). However, industry data indicates that ~ 1g shrimp may be attained within 30 days of stocking at an initial mass of 0.04g and grow-out performance may be influenced by production strategy. This highlights the value in conducting pilot scale studies for intensive data gathering prior to finalising commercial production facility designs.
+
+Estimated duration to reach key body-weights:
+
+* `r bw.1`g; `r shrimp.0.5g` days.
+* `r bw.20`g; `r shrimp.20g` days.
+* `r bw.25`g; `r shrimp.25g` days.
+
+## Production targets
+
+``` {r productionTargets}
+# phase survival (Mark indicates 70%, 90%, 90%) - take conservative view of c(60, 80, 80)
+nursery.survival.25 <- 0.7
+growout.1.survival.25 <- 0.8
+growout.2.survival.25 <- 0.80
+nursery.survival.20 <- 0.64
+growout.1.survival.20 <- 0.83
+growout.2.survival.20 <- 0.83
+
+annual.target <- 200000 # kilos
+batch.frequency <- 14 # days between batches
+
+annual.batches <- 365 / batch.frequency
+batch.target <- as.integer(annual.target / annual.batches)
+
+# custom color
+system.cols <- c(nursery_1 = "#bdc9e1", growout_1 = "#74a9cf", growout_2 = "#0570b0")
+
+```
+
+``` {r productionPlan20}
+batch.system.periods.20 <- 4 # overall number of system periods
+production.cycle.20 <- 168  # period whose factor should include frequency, system period and exceeds minimum growout period
+nursery.1.period.20 <- 40
+growout.1.period.20 <- 52
+growout.2.period.20 <- 52
+
+target.mass.20 <- bw.20 # mass in g
+
+nursery.1.max.20 <- bodyweight.nursery %>%
+  filter(day == nursery.1.period.20) %>%
+  select(arithmetic_bw)
+
+growout.1.max.20 <- bodyweight.growout %>%
+  filter(model == "arithmetic_bw" & day == growout.1.period.20) %>%
+  select(bw)
+
+growout.2.max.20 <- bodyweight.growout %>%
+  filter(model == "arithmetic_bw" & day == growout.1.period.20 + growout.2.period.20) %>%
+  select(bw)
+
+# set production period to two growth periods to observe system loading
+prod_plan.20 <- data.frame(facility.day = seq(0, 4 * production.cycle.20 - 1)) %>%
+  mutate(batch_1 = case_when(facility.day < production.cycle.20 ~ facility.day))
+
+for (lag_size in c(0:24)) {
+  
+  new_col_name <- paste0("lag.batch.", lag_size)
+  
+  prod_plan.20 <- prod_plan.20 %>%
+    mutate(!!sym(new_col_name) := lag(batch_1, n = lag_size * batch.frequency, default = NA))
+}
+
+# remove column called batch_1
+prod.plan.20 <- prod_plan.20 %>% select(-batch_1) %>%
+  pivot_longer(c(lag.batch.0:lag.batch.24), names_to = "batch", values_to = "batch_day", values_drop_na = TRUE) %>%
+  mutate(system = case_when(batch_day %in% c(0:nursery.1.period.20) ~ "nursery_1",
+                            batch_day %in% c(nursery.1.period.20 + 1: growout.1.period.20) ~ "growout_1",
+                            batch_day %in% c(nursery.1.period.20 + growout.1.period.20 + 1 : growout.2.period.20) ~ "growout_2")) %>%
+  drop_na()
+
+systems_plot.20 <- prod.plan.20 %>%
+  filter(batch_day <= production.cycle.20,
+         batch %in% c("lag.batch.0", "lag.batch.1", "lag.batch.2", "lag.batch.3", "lag.batch.4", "lag.batch.5")) %>%
+  ggplot(aes(facility.day, batch, color = system)) +
+  geom_line(size = 3) +
+  geom_vline(xintercept = c(nursery.1.period.20, nursery.1.period.20 + growout.1.period.20 + 1, nursery.1.period.20 + growout.1.period.20 + growout.2.period.20 + 1)) +
+  scale_y_discrete(limits = c("lag.batch.0", "lag.batch.1", "lag.batch.2", "lag.batch.3", "lag.batch.4", "lag.batch.5"),
+                   labels = c("Batch 1", "Batch 2", "Batch 3", "Batch 4", "Batch 5", "Batch 6")) +
+  scale_color_manual("", breaks = c("nursery_1", "growout_1", "growout_2"),
+                     values = c(system.cols),
+                     labels = c("Nursery 1", "Growout 1", "Growout 2")) +
+  labs(x = "Day", y = "") + 
+  theme_minimal()
+
+# numbers required per batch
+final.batch.number.20 <- batch.target / target.mass.20 * 1000
+growout.2.initial.20 <- final.batch.number.20 / growout.2.survival.20
+growout.1.initial.20 <- growout.2.initial.20 / growout.1.survival.20
+nursery.1.initial.20 <- growout.1.initial.20 / nursery.survival.20
+```
+
+
+``` {r productionPlan25}
+batch.system.periods.25 <- 4 # overall number of system periods
+production.cycle.25 <- 175  # period whose factor should include frequency, system period and exceeds minimum growout period
+nursery.1.period.25 <- 32
+growout.1.period.25 <- 63
+growout.2.period.25 <- 63
+
+target.mass.25 <- bw.25 # mass in g
+
+nursery.1.max.25 <- bodyweight.nursery %>%
+  filter(day == nursery.1.period.25) %>%
+  select(arithmetic_bw)
+
+growout.1.max.25 <- bodyweight.growout %>%
+  filter(model == "arithmetic_bw" & day == growout.1.period.25) %>%
+  select(bw)
+
+growout.2.max.25 <- bodyweight.growout %>%
+  filter(model == "arithmetic_bw" & day == growout.1.period.25 + growout.2.period.25) %>%
+  select(bw)
+
+# set production period to two growth periods to observe system loading
+prod_plan.25 <- data.frame(facility.day = seq(0, 4 * production.cycle.25 - 1)) %>%
+  mutate(batch_1 = case_when(facility.day < production.cycle.25 ~ facility.day))
+
+for (lag_size in c(0:24)) {
+  
+  new_col_name <- paste0("lag.batch.", lag_size)
+  
+  prod_plan.25 <- prod_plan.25 %>%
+    mutate(!!sym(new_col_name) := lag(batch_1, n = lag_size * batch.frequency, default = NA))
+}
+
+# remove column called batch_1
+prod.plan.25 <- prod_plan.25 %>% select(-batch_1) %>%
+  pivot_longer(c(lag.batch.0:lag.batch.24), names_to = "batch", values_to = "batch_day", values_drop_na = TRUE) %>%
+  mutate(system = case_when(batch_day %in% c(0:nursery.1.period.25) ~ "nursery_1",
+                            batch_day %in% c(nursery.1.period.25 + 1: growout.1.period.25) ~ "growout_1",
+                            batch_day %in% c(nursery.1.period.25 + growout.1.period.25 + 1 : growout.2.period.25) ~ "growout_2")) %>%
+  drop_na()
+
+systems_plot.25 <- prod.plan.25 %>%
+  filter(batch_day <= production.cycle.25,
+         batch %in% c("lag.batch.0", "lag.batch.1", "lag.batch.2", "lag.batch.3", "lag.batch.4", "lag.batch.5")) %>%
+  ggplot(aes(facility.day, batch, color = system)) +
+  geom_line(size = 3) +
+  scale_y_discrete(limits = c("lag.batch.0", "lag.batch.1", "lag.batch.2", "lag.batch.3", "lag.batch.4", "lag.batch.5"),
+                   labels = c("Batch 1", "Batch 2", "Batch 3", "Batch 4", "Batch 5", "Batch 6")) +
+  scale_color_manual("", breaks = c("nursery_1", "growout_1", "growout_2"),
+                     values = c(system.cols),
+                     labels = c("Nursery 1", "Growout 1", "Growout 2")) +
+  geom_vline(xintercept = c(nursery.1.period.25, nursery.1.period.25 + growout.1.period.25 + 1, nursery.1.period.25 + growout.1.period.25 + growout.2.period.25 + 1)) +
+  labs(x = "Day", y = "") + 
+  theme_minimal()
+
+# numbers required per batch
+final.batch.number.25 <- batch.target / target.mass.25 * 1000
+growout.2.initial.25 <- final.batch.number.25 / growout.2.survival.25
+growout.1.initial.25 <- growout.2.initial.25 / growout.1.survival.25
+nursery.1.initial.25 <- growout.1.initial.25 / nursery.survival.25
+```
+
+Based upon client indication, initial aim is to have main product harvest at ~ 25g (falls within range of 16/20 units per pound). Due to the highly competitive import market of frozen shrimp, a potential strategy of marketing locally sourced, never-frozen shrimp, to command a premium-priced product, has been suggested.
+
+Initial conversations have focused upon an annual production rate in the region of 1000 tonnes per year, possibly with a weekly harvest regime. However, further information is required to determine market demand and is being investigated by the client.
+
+Prior to development and investment in a commercial scale of this size the recommended course would be a pilot scale facility that would be scaleable (modular based), and ideally be able to be incorporated into a future commercial facility.
+
+A suitable pilot scale for proof of concept would be 20 tonnes per year, with initial aim of either: securing two main harvest periods per year 
+or
+stock successive batches using divisions of tanks.
+
+Discussions with industry experts have indicated reduction in rates of growth above 20g. Mortality rates may also increase due to vulnerability of shrimp each time they go through periodic moulting (associated with increase in size).
+
+Recommendation at this stage would be to aim for 20g product, unless market demand and economic factors suggest otherwise.
+
+Modular production units, with a volume of 200 tonnes per year, may be a sensible direction to take. This strategy would allow for successive investment to build on scale of production.
+
+``` {r productionPlan20a, fig.cap = "Graphical representation of batch duration and overlap for production of 20g shrimp, batches every two weeks", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+systems_plot.20
+```
+
+
+A production plan with `r batch.frequency` days between successive stocking batches, and harvests at `r bw.20`g shrimp would intail three batches overlapping at the nursery stage and four batches overlapping at growout 1 and growout 2 stages. A requirement of `r format(nursery.1.initial.20, scientific = FALSE, big.mark = ",")` PL-12 would be required per batch to secure an annual target harvest of `r annual.target / 1000` tonnes per `r annual.target / 1000`T module.
+
+In this scenario, each growth stanza would have the following durations: 
+
+* Nursery `r nursery.1.period.20` days.
+* Growout 1 `r growout.1.period.20` days.
+* Growout 2 `r growout.2.period.20` days.
+
+
+***
+
+
+# Feed Models
+
+``` {r feedModels}
+
+feed <- read.csv("data/feed.csv") %>%
+  mutate(mass = (mass_1 + mass_2) / 2,
+         prop_feed = (rate_1 + rate_2) / 2)
+
+feed.twinlog <- lm(log(prop_feed) ~ log(mass), data = feed)
+
+feed.plot <- feed %>%
+  ggplot(aes(mass, prop_feed)) +
+  geom_point() +
+  stat_function(fun = function(x) exp(feed.twinlog$coefficients[1]) * x ^ feed.twinlog$coefficients[2],
+                color = "orange",
+                xlim = c(0.1, 25),
+                alpha = 0.4) +
+  labs(x = "Shrimp bodyweight (g)",
+       y = "Feed as a proportion of bodyweight (%)") +
+  theme_minimal()
+
+# clear water feed rate
+feed.cw <- read.csv("data/feed_cw.csv")
+
+feed.cw.twinlog <- lm(log(prop_feed) ~ log(mass), data = feed.cw)
+
+feed.cw.plot <- feed.cw %>%
+  ggplot(aes(mass, prop_feed)) +
+  geom_point() +
+  stat_function(fun = function(x) exp(feed.cw.twinlog$coefficients[1]) * x ^ feed.cw.twinlog$coefficients[2],
+                color = "orange",
+                xlim = c(0.11, 30),
+                alpha = 0.4) +
+  ylim(c(0, 0.3)) +
+  labs(x = "Shrimp bodyweight (g)",
+       y = "Feed as a proportion of bodyweight (%)") +
+  theme_minimal()
+
+# clear water feed rate
+feed.bf <- read.csv("data/feed_bf.csv")
+
+feed.bf.twinlog <- lm(log(prop_feed) ~ log(mass), data = feed.bf)
+
+feed.bf.plot <- feed.bf %>%
+  ggplot(aes(mass, prop_feed)) +
+  geom_point() +
+  stat_function(fun = function(x) exp(feed.bf.twinlog$coefficients[1]) * x ^ feed.bf.twinlog$coefficients[2],
+                color = "orange",
+                xlim = c(0.11, 30),
+                alpha = 0.4) +
+  ylim(c(0, 0.3)) +
+  labs(x = "Shrimp bodyweight (g)",
+       y = "Feed as a proportion of bodyweight (%)") +
+  theme_minimal()
+
+```
+
+
+``` {r feedModelCW, fig.cap = "Feeding rate for Litopeneaus vannamei; Skretting clear water feed tables", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+feed.cw.plot
+```
+
+
+``` {r feedModelBF, fig.cap = "Feeding rate for Litopeneaus vannamei; Skretting bioflok feed tables", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+feed.bf.plot
+```
+
+
+``` {r tankDensity}
+
+# density in kg/m2
+density.1 <- 3
+density.2 <- 5.5
+density.3 <- 7
+
+nursery.tanks <- 6
+growout.1.tanks <- 12
+growout.2.tanks <- 12
+```
+
+The following livestock tank numbers and densities have been selected for each system stage:
+
+* Nursery; `r density.1` kg/m^2^, `r nursery.tanks` per batch
+* Growout 1; `r density.2` kg/m^2^, `r growout.1.tanks` per batch
+* Growout 2; `r density.3` kg/m^2^, `r growout.2.tanks` per batch
+
+``` {r systemLoading20}
+
+# build system loading onto production plan
+system.loading.20 <- prod.plan.20 %>%
+  mutate(total.number = case_when(system == "nursery_1" ~ nursery.1.initial.20 * exp(1)^(log(nursery.survival.20) / nursery.1.period.20 * batch_day),
+                                  system == "growout_1" ~ growout.1.initial.20 * exp(1)^(log(growout.1.survival.20) / growout.1.period.20 * (batch_day - (nursery.1.period.20 + 1))),
+                                  system == "growout_2" ~ growout.2.initial.20 * exp(1)^(log(growout.2.survival.20) / growout.2.period.20 * (batch_day - (nursery.1.period.20 + 1) - growout.1.period.20))),
+         total.number = case_when(system == "growout_2" & batch_day >= nursery.1.period.20 + growout.1.period.20 + growout.2.period.20 -10 ~ total.number - (annual.target / (365/7) / 0.02), TRUE ~ total.number),
+         bw = case_when(system == "nursery_1" ~ (bw.0^c_1_nursery + c_2_nursery * batch_day)^c_4_nursery,
+                        TRUE ~ (as.numeric(nursery.1.max.20)^c_1 + c_2 * (batch_day - nursery.1.period.20 + 1))^c_4),
+         total.bw.kg = bw / 1000 * total.number,
+         feed.rate.cw = case_when(bw < 0.2 ~ 0.20,
+                               TRUE ~ exp(feed.cw.twinlog$coefficients[1]) * bw ^ feed.cw.twinlog$coefficients[2]),
+         total.feed.cw = feed.rate.cw * total.bw.kg,
+         protein.proportion = case_when(bw < 1 ~ 0.4,
+                                        TRUE ~ 0.35),
+         total.protein.cw = total.feed.cw * protein.proportion,
+         feed.rate.bf = case_when(bw < 0.2 ~ 0.20,
+                               TRUE ~ exp(feed.bf.twinlog$coefficients[1]) * bw ^ feed.bf.twinlog$coefficients[2]),
+         total.feed.bf = feed.rate.bf * total.bw.kg,
+         total.protein.bf = total.feed.bf * protein.proportion,
+         tank.occupation = case_when(system == "nursery_1" ~ nursery.tanks,
+                                     system == "growout_1" ~ growout.1.tanks,
+                                     system == "growout_2" & batch_day < nursery.1.period.20 + growout.1.period.20 + growout.2.period.20 -10 ~ growout.2.tanks,
+                                     system == "growout_2" & batch_day >= nursery.1.period.20 + growout.1.period.20 + growout.2.period.20 -10 ~ growout.2.tanks / 2),
+         max.density = case_when(system == "nursery_1" ~ density.1,
+                                 system == "growout_1" ~ density.2,
+                                 system == "growout_2" ~ density.3),
+         min.tank.d = sqrt(total.bw.kg / tank.occupation / max.density * 4 / pi),
+         min.tank.sa = total.bw.kg / tank.occupation / max.density)
+```
+
+``` {r systemLoading25}
+
+# build system loading onto production plan
+system.loading.25 <- prod.plan.25 %>%
+  mutate(total.number = case_when(system == "nursery_1" ~ nursery.1.initial.25 * exp(1)^(log(nursery.survival.25) / nursery.1.period.25 * batch_day),
+                                  system == "growout_1" ~ growout.1.initial.25 * exp(1)^(log(growout.1.survival.25) / growout.1.period.25 * (batch_day - (nursery.1.period.25 + 1))),
+                                  system == "growout_2" ~ growout.2.initial.25 * exp(1)^(log(growout.2.survival.25) / growout.2.period.25 * (batch_day - (nursery.1.period.25 + 1) - growout.1.period.25))),
+         total.number = case_when(system == "growout_2" & batch_day >= nursery.1.period.25 + growout.1.period.25 + growout.2.period.25 -10 ~ total.number - (annual.target / (365/7) / 0.025), TRUE ~ total.number),
+         bw = case_when(system == "nursery_1" ~ (bw.0^c_1_nursery + c_2_nursery * batch_day)^c_4_nursery,
+                        TRUE ~ (as.numeric(nursery.1.max.25)^c_1 + c_2 * (batch_day - nursery.1.period.25 + 1))^c_4),
+         total.bw.kg = bw / 1000 * total.number,
+         feed.rate.cw = case_when(bw < 0.2 ~ 0.20,
+                               TRUE ~ exp(feed.cw.twinlog$coefficients[1]) * bw ^ feed.cw.twinlog$coefficients[2]),
+         total.feed.cw = feed.rate.cw * total.bw.kg,
+         protein.proportion = case_when(bw < 1 ~ 0.4,
+                                        TRUE ~ 0.35),
+         total.protein.cw = total.feed.cw * protein.proportion,
+         feed.rate.bf = case_when(bw < 0.2 ~ 0.20,
+                               TRUE ~ exp(feed.bf.twinlog$coefficients[1]) * bw ^ feed.bf.twinlog$coefficients[2]),
+         total.feed.bf = feed.rate.bf * total.bw.kg,
+         total.protein.bf = total.feed.bf * protein.proportion,
+         tank.occupation = case_when(system == "nursery_1" ~ nursery.tanks,
+                                     system == "growout_1" ~ growout.1.tanks,
+                                     system == "growout_2" & batch_day < nursery.1.period.25 + growout.1.period.25 + growout.2.period.25 -10 ~ growout.2.tanks,
+                                     system == "growout_2" & batch_day >= nursery.1.period.25 + growout.1.period.25 + growout.2.period.25 -10 ~ growout.2.tanks / 2),
+         max.density = case_when(system == "nursery_1" ~ density.1,
+                                 system == "growout_1" ~ density.2,
+                                 system == "growout_2" ~ density.3),
+         min.tank.d = sqrt(total.bw.kg / tank.occupation / max.density * 4 / pi),
+         min.tank.sa = total.bw.kg / tank.occupation / max.density)
+```
+\
+
+``` {r totalNumberPlot20, fig.cap = "Livestock loading for one batch in 20g production plan", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+stock.plot.20 <- system.loading.20 %>%
+  filter(batch == "lag.batch.0") %>%
+  ggplot(aes(batch_day, total.number / 1000, color = system)) +
+  geom_line() +
+  scale_color_manual("", breaks = c("nursery_1", "growout_1", "growout_2"),
+                     values = c(system.cols),
+                     labels = c("Nursery 1", "Growout 1", "Growout 2")) +
+  labs(x = "Day", y = "Shrimp number (thousand)") +
+  theme_minimal()
+
+stock.plot.20
+```
+
+
+``` {r totalNumberPlot25}
+
+stock.plot.25 <- system.loading.25 %>%
+  filter(batch == "lag.batch.0") %>%
+  ggplot(aes(batch_day, total.number / 1000, color = system)) +
+  geom_line() +
+  scale_color_manual("", breaks = c("nursery_1", "growout_1", "growout_2"),
+                     values = c(system.cols),
+                     labels = c("Nursery 1", "Growout 1", "Growout 2")) +
+  labs(x = "Day", y = "Shrimp number (thousand)") +
+  theme_minimal()
+
+```
+
+
+``` {r tankDimensions}
+
+tank.dims.20 <- system.loading.20 %>%
+  group_by(system) %>%
+  summarise(tank.d = max(min.tank.d)) %>%
+  arrange(match(system, c("nursery_1", "growout_1", "growout_2"))) %>%
+  mutate(tank.sa = pi * (0.5 * tank.d)^2,
+         width = sqrt(tank.sa/4),
+         length = 4 * width)
+
+tank.dims.25 <- system.loading.25 %>%
+  group_by(system) %>%
+  summarise(tank.d = max(min.tank.d)) %>%
+  arrange(match(system, c("nursery_1", "growout_1", "growout_2")))%>%
+  mutate(tank.sa = pi * (0.5 * tank.d)^2,
+         width = sqrt(tank.sa/4),
+         length = 4 * width)
+```
+
+``` {r tankDims20, ft.align="center"}
+
+tank.dims.20 %>%
+  flextable() %>%
+  set_header_labels(system = "System", tank.d = "Diameter (m)", tank.sa = "Surface Area", width = "Width (m)", length = "Length (m)") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("Tank dimensions 20g target, circular or rectangular options."),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+
+
+***
+
+## Feed inputs
+
+The following models will focus on the difference in system inputs and outputs for biofloc versus clear-water systems using the 20g production plan at 200 tonnes per year.
+
+``` {r feedPlotcw20, fig.cap = "Feed loading for one batch in 20g production plan clear-water system", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+feed.plot.20 <- system.loading.20 %>%
+  filter(batch == "lag.batch.0") %>%
+  ggplot(aes(batch_day, total.feed.cw, color = system)) +
+  geom_line() +
+  scale_color_manual("", breaks = c("nursery_1", "growout_1", "growout_2"),
+                     values = c(system.cols),
+                     labels = c("Nursery 1", "Growout 1", "Growout 2")) +
+  labs(x = "Day", y = "Daily feed requirement (Kg)") +
+  theme_minimal()
+
+feed.plot.20
+```
+
+
+``` {r feedPlotbf20, fig.cap = "Feed loading for one batch in 20g production plan biofloc system", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+feed.plot.20bf <- system.loading.20 %>%
+  filter(batch == "lag.batch.0") %>%
+  ggplot(aes(batch_day, total.feed.bf, color = system)) +
+  geom_line() +
+  scale_color_manual("", breaks = c("nursery_1", "growout_1", "growout_2"),
+                     values = c(system.cols),
+                     labels = c("Nursery 1", "Growout 1", "Growout 2")) +
+  labs(x = "Day", y = "Daily feed requirement (Kg)") +
+  theme_minimal()
+
+feed.plot.20bf
+```
+
+``` {r feedCosts}
+
+# currency conversion dollar to pound
+dollarToPound <- 0.8
+nova.shrimp.0.6 <- 1.15
+nova.shrimp.1.0 <- 1.06
+nova.shrimp.grower <- 0.61
+
+feed.cost.20 <- system.loading.20 %>%
+  mutate(feed.cost.kg = case_when(bw <= 0.2 ~ nova.shrimp.0.6 / dollarToPound,
+                                  bw > 0.2 & bw <= 1 ~ nova.shrimp.1.0 /dollarToPound,
+                                  TRUE ~ nova.shrimp.grower / dollarToPound),
+         total.feed.cost.cw = total.feed.cw * feed.cost.kg,
+         total.feed.cost.bf = total.feed.bf * feed.cost.kg)
+
+feed.cost.25 <- system.loading.25 %>%
+  mutate(feed.cost.kg = case_when(bw <= 0.2 ~ nova.shrimp.0.6 / dollarToPound,
+                                  bw > 0.2 & bw <= 1 ~ nova.shrimp.1.0 /dollarToPound,
+                                  TRUE ~ nova.shrimp.grower / dollarToPound),
+         total.feed.cost.cw = total.feed.cw * feed.cost.kg,
+         total.feed.cost.bf = total.feed.bf * feed.cost.kg)
+```
+
+
+``` {r feedCostBatchSummary, ft.align="center"}
+
+feed.cost.summary.20 <-
+  feed.cost.20 %>%
+  filter(batch == "lag.batch.0") %>%
+  summarise(batch.cost.cw = sum(total.feed.cost.cw),
+            batch.cost.bf = sum(total.feed.cost.bf))
+
+feed.cost.summary.25 <-
+  feed.cost.25 %>%
+  filter(batch == "lag.batch.0") %>%
+  summarise(batch.cost.cw = sum(total.feed.cost.cw),
+            batch.cost.bf = sum(total.feed.cost.bf))
+
+feed.cost.summary <- bind_rows("PP20" = feed.cost.summary.20, "PP25" = feed.cost.summary.25, .id = "PP")
+
+feed.cost.summary %>%
+  flextable() %>%
+  set_header_labels(batch.cost.cw = "Feed Cost CW (£)", batch.cost.bf = "Feed Cost BF (£)") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("Feed costs per batch (includes two harvests and total harvest mass of ~ 7700 kg)."),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+
+***
+
+
+
+``` {r systemParameters20}
+
+# for marine shrimp in zero-exchange system, Ptan = F * PC * 0.144
+# for starvation, TAN = 0.067 mg N-NH3 / h / g
+# starvation oxygen concentration ~ 1 mg oxy/g/h
+# organic carbon requirements: TAN * 15.17 is carb requirement, less feed carb content* 0.1089 / 0.4
+
+# loading parameters
+system.parameters.20 <- system.loading.20 %>%
+  mutate(total.tan.cw = total.feed.cw * protein.proportion * 0.144,
+         total.tan.bf = total.feed.bf * protein.proportion * 0.144,
+         tss.cw = total.feed.cw * 0.25,
+         tss.bf = total.feed.bf * 0.25 + total.tan.bf * 8.07,
+         od.cw = total.feed.cw * 0.25 + total.tan.cw * 4.57,
+         od.bf = total.feed.bf * 0.25 + total.tan.bf * 4.71,
+         alk.cw = total.tan.cw * 7.05,
+         alk.bf = total.tan.bf * 3.57,
+         org.carbon.bf = total.feed.bf * protein.proportion * 0.144 * 15.17 - (total.feed.bf * 0.1089 / 0.4),
+         co2.cw = od.cw * 1.375,
+         co2.bf = od.bf * 1.375)
+```
+
+``` {r systemParameters25}
+
+# for marine shrimp in zero-exchange system, Ptan = F * PC * 0.144
+# for starvation, TAN = 0.067 mg N-NH3 / h / g
+# starvation oxygen concentration ~ 1 mg oxy/g/h
+# organic carbon requirements: TAN * 15.17 is carb requirement, less feed carb content* 0.1089 / 0.4
+
+# loading parameters
+system.parameters.25 <- system.loading.25 %>%
+  mutate(total.tan.cw = total.feed.cw * protein.proportion * 0.144,
+         total.tan.bf = total.feed.bf * protein.proportion * 0.144,
+         tss.cw = total.feed.cw * 0.25,
+         tss.bf = total.feed.bf * 0.25 + total.tan.bf * 8.07,
+         od.cw = total.feed.cw * 0.25 + total.tan.cw * 4.57,
+         od.bf = total.feed.bf * 0.25 + total.tan.bf * 4.71,
+         alk.cw = total.tan.cw * 7.05,
+         alk.bf = total.tan.bf * 3.57,
+         org.carbon.bf = total.feed.bf * protein.proportion * 0.144 * 15.17 - (total.feed.bf * 0.1089 / 0.4),
+         co2.cw = od.cw * 1.375,
+         co2.bf = od.bf * 1.375)
+```
+
+Total quantity of feed per batch CW `r format(as.double(system.parameters.20 %>% filter(batch == "lag.batch.0") %>% summarise(feed.sum = sum(total.feed.cw))), scientific = FALSE, digits = 1)`kg
+
+Total quantity of feed per batch BF `r format(as.double(system.parameters.20 %>% filter(batch == "lag.batch.0") %>% summarise(feed.sum = sum(total.feed.bf))), scientific = FALSE, digits = 1)`kg
+
+Total quantity of supplementary organic carbon required `r format(as.double(system.parameters.20 %>% filter(batch == "lag.batch.0") %>% summarise(carbon.sum = sum(org.carbon.bf))), scientific = FALSE, digits = 1)`kg
+
+
+# System Loading
+
+
+
+``` {r systemLoading20cw}
+
+max.loading.20.cw <- system.parameters.20 %>%
+  filter(facility.day >= 100) %>%
+  group_by(system, facility.day) %>%
+  summarise(across(c(total.feed.cw, total.tan.cw, tss.cw, od.cw, alk.cw, co2.cw), sum, na.rm = TRUE)) %>%
+  summarise(across(c(total.feed.cw, total.tan.cw, tss.cw, od.cw, alk.cw, co2.cw), max, na.rm = TRUE)) %>%
+  arrange(match(system, c("nursery_1", "growout_1", "growout_2")))
+
+avg.loading.20.cw <- system.parameters.20 %>%
+  filter(facility.day >= 100) %>%
+  group_by(system, facility.day) %>%
+  summarise(across(c(total.feed.cw, total.tan.cw, tss.cw, od.cw, alk.cw, co2.cw), sum, na.rm = TRUE)) %>%
+  summarise(across(c(total.feed.cw, total.tan.cw, tss.cw, od.cw, alk.cw, co2.cw), mean, na.rm = TRUE)) %>%
+  arrange(match(system, c("nursery_1", "growout_1", "growout_2")))
+
+```
+
+``` {r systemLoading25cw}
+max.loading.25.cw <- system.parameters.25 %>%
+  group_by(system, facility.day) %>%
+  summarise(across(c(total.feed.cw, total.tan.cw, tss.cw, od.cw, alk.cw, co2.cw), sum, na.rm = TRUE)) %>%
+  summarise(across(c(total.feed.cw, total.tan.cw, tss.cw, od.cw, alk.cw, co2.cw), max, na.rm = TRUE))
+```
+
+
+## Clear-water loading
+
+Maximum and average system loading can be use to specify system performance requirements. Tables below summarise loading data for production plans for 20g shrimp production at annual volume of 200T.
+
+``` {r maxsystemLoading20cwTable, ft.align="center"}
+
+max.loading.20.cw %>%
+  flextable() %>%
+  set_header_labels(system = "System", total.feed.cw = "Feed Loading (kg)", total.tan.cw = "TAN (kg/day)", tss.cw = "TSS (kg/day)", od.cw = "Oxygen demand (kg/day)", alk.cw = "Alkalinity demand (kg/day)", co2.cw = "CO2 (kg/day)") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("System loading/ demand for 20g production plan clear-water, summary of maximum loads (overlapping batches within system summed)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+
+
+
+``` {r avgSystemLoading20cwTable, ft.align="center"}
+
+avg.loading.20.cw %>%
+  flextable() %>%
+  set_header_labels(system = "System", total.feed.cw = "Feed Loading (kg)", total.tan.cw = "TAN (kg/day)", tss.cw = "TSS (kg/day)", od.cw = "Oxygen demand (kg/day)", alk.cw = "Alkalinity demand (kg/day)", co2.cw = "CO2 (kg/day)") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("System loading/ demand for 20g production plan clear-water, summary of average loads (overlapping batches within system summed)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+## Biofloc system loading
+
+
+
+``` {r systemLoading20bf}
+max.loading.20.bf <- system.parameters.20 %>%
+  filter(batch == "lag.batch.0") %>%
+  group_by(system) %>%
+  summarise(across(c(total.feed.bf, total.tan.bf, tss.bf, od.bf, alk.bf, co2.bf, org.carbon.bf), max, na.rm = TRUE)) %>%
+  arrange(match(system, c("nursery_1", "growout_1", "growout_2")))
+```
+
+Biofloc systems operate on an individual tank basis (water is not shared between tanks) therefore each tank can be described as a system in itself. For the purposes of the summary tables below, note that since tank size has not been finalised. Therefore the summary tables represent the total volume of water for each growth stanza (as if there were only one tank per stanza). Also note that the same production plan applies as with the clear-water scenario. Batches will overlap as described previously - therefore sufficient tanks will need to be provided to accommodate this.
+
+
+
+``` {r maxsystemLoading20bfTable, ft.align="center"}
+
+max.loading.20.bf %>%
+  flextable() %>%
+  set_header_labels(system = "System", total.feed.bf = "Feed Loading (kg)", total.tan.bf = "TAN (kg/day)", tss.bf = "TSS (kg/day)", od.bf = "Oxygen demand (kg/day)", alk.bf = "Alkalinity demand (kg/day)", co2.bf = "CO2 (kg/day)", org.carbon.bf = "Organic C suppliment (kg/day)") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("System loading/ demand for 20g production plan biofloc, summary of maximum loads per batch (overlapping batches not summed as they are not connected tanks)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+### Biofloc facility loading
+
+
+
+``` {r facilityLoading20bf}
+
+max.facility.loading.20.bf <- system.parameters.20 %>%
+  filter(facility.day >= 100) %>%
+  group_by(system, facility.day) %>%
+  summarise(across(c(total.feed.bf, total.tan.bf, tss.bf, od.bf, alk.bf, co2.bf, org.carbon.bf), sum, na.rm = TRUE)) %>%
+  summarise(across(c(total.feed.bf, total.tan.bf, tss.bf, od.bf, alk.bf, co2.bf, org.carbon.bf), max, na.rm = TRUE)) %>%
+  arrange(match(system, c("nursery_1", "growout_1", "growout_2")))
+
+avg.facility.loading.20.bf <- system.parameters.20 %>%
+  filter(facility.day >= 100) %>%
+  group_by(system, facility.day) %>%
+  summarise(across(c(total.feed.bf, total.tan.bf, tss.bf, od.bf, alk.bf, co2.bf, org.carbon.bf), sum, na.rm = TRUE)) %>%
+  summarise(across(c(total.feed.bf, total.tan.bf, tss.bf, od.bf, alk.bf, co2.bf, org.carbon.bf), mean, na.rm = TRUE)) %>%
+  arrange(match(system, c("nursery_1", "growout_1", "growout_2")))
+
+```
+
+``` {r maxfacilityLoading20bfTable, ft.align="center"}
+
+max.facility.loading.20.bf %>%
+  flextable() %>%
+  set_header_labels(system = "System", total.feed.bf = "Feed Loading (kg)", total.tan.bf = "TAN (kg/day)", tss.bf = "TSS (kg/day)", od.bf = "Oxygen demand (kg/day)", alk.bf = "Alkalinity demand (kg/day)", co2.bf = "CO2 (kg/day)", org.carbon.bf = "Supp. C (kg/day)") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("Facility loading/ demand for 20g production plan biofloc, summary of maximum loads (overlapping batches within system summed)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+``` {r avgSystemLoading20bfTable, ft.align="center"}
+
+avg.facility.loading.20.bf %>%
+  flextable() %>%
+  set_header_labels(system = "System", total.feed.bf = "Feed Loading (kg)", total.tan.bf = "TAN (kg/day)", tss.bf = "TSS (kg/day)", od.bf = "Oxygen demand (kg/day)", alk.bf = "Alkalinity demand (kg/day)", co2.bf = "CO2 (kg/day)",  org.carbon.bf = "Supp. C (kg/day)") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("Facility loading/ demand for 20g production plan biofloc, summary of average loads (overlapping batches within system summed)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+# Water Quality Parameters
+
+
+``` {r massBalanceParameters}
+
+# define water quality parameters
+clearwater.tss <- 25 # max 20 mg/l in tanks
+desired.o2 <- 5.0 # min 5 mg/l in tanks
+desired.tan <- 1 # max 1 mg/l TAN in tanks
+desired.nitrate <- 100 # max 50 mg/l nitrate in tanks
+desired.co2 <- 15 # max 15 mg/l in tanks
+desired.t <- 28 # system operating temp in C
+site.altitude <- 50 # site altitude in metres
+cone.bar <- 0.7
+feeding.period <- 20
+metabolic.period <- feeding.period + 4
+salinity <- 32 # ppt
+desired.ph <- 8.2
+
+biofloc.tss <- 250
+```
+
+The following have been selected for system modelling in clear-water systems:
+
+* TAN `r desired.tan` mg/l
+* TSS `r clearwater.tss` mg/l
+* O~2~ `r desired.o2` mg/l
+* NO~3~ `r desired.nitrate` mg/l
+* CO~2~ `r desired.co2` mg/l
+* Temperature `r desired.t` ^o^C
+
+Parameters differing in biofloc system:
+
+* TSS `r biofloc.tss` mg/l
+
+``` {r oxygenConstants}
+
+# constants
+k <- 1.42903
+beta.oxygen <- exp(-58.3877 + 85.8079 *  (100/(desired.t + 273.15)) + 23.8439 * log((desired.t+273.15) / 100))
+barometric.pressure <- 10^(2.88014 - site.altitude/19748.2)
+water.v.pressure <- 4.7603 * exp(0.0645 * desired.t)
+oxygen.percent <- 95
+cone.pressure <- cone.bar * 750.06 + barometric.pressure
+oxygen.saturation <- 1000 * k * beta.oxygen * oxygen.percent / 100 * ((cone.pressure - water.v.pressure) / 760) # if cone used at pressure swap out barometric.pressure for cone.pressure
+oxygen.saturation.saline <- oxygen.saturation * 0.8
+oxygen.super.saturated <- 34
+```
+
+
+``` {r massBalanceCValues}
+# component specifics
+# system efficiency 
+tan.c1 <- desired.tan
+tan.cbest <- 0
+tan.te <- 1
+tan.c2 <- tan.c1 + tan.te * (tan.cbest - tan.c1)
+
+co2.c1 <- desired.co2
+co2.cbest <- 0.5
+co2.te <- 0.7
+co2.c2 <- co2.c1 + co2.te * (co2.cbest - co2.c1)
+
+tss.c1 <- clearwater.tss
+tss.cbest <- 0
+tss.te <- 0.7 
+tss.c2 <- tss.c1 + tss.te * (tss.cbest - tss.c1)
+
+oxy.c1 <- desired.o2 # min 5 mg/l in tanks
+oxy.cbest <- oxygen.super.saturated
+oxy.te <- 0.99
+oxy.c2 <- oxy.c1 + oxy.te * (oxy.cbest - oxy.c1)
+```
+
+***
+
+## Nitrogen
+
+``` {r freeAmmonia}
+
+pka = 0.0901821 + 2729.92/(desired.t + 273.15)
+ionic.strength = 19.9273 * salinity / (1000 - 1.005109 * salinity)
+pkas = pka + (0.1552 - 0.000314 * desired.t) * ionic.strength
+mole.fraction = 1 / (1 + 10^(pkas - desired.ph))
+free.ammonia = desired.tan * mole.fraction
+```
+
+Nitrogen loading is slightly different in terms of input between clear-water and biofloc systems - due to differences in recommended feeding rates (as indicated by Skretting). Nitrogeneous waste generated by metabolism (describes as total ammonia nitrogen TAN-N) is processed via different pathways in clear-water and biofloc systems. TAN-N must be maintained within a defined range according to species tolerance (in this case `r desired.tan` mg/l ionised ammonia, which relates to approximately `r format(free.ammonia, digits = 2)` mg/l unionised ammonia)
+
+Ammonia removal from intensive aquaculture production can be managed by three distinct pathways:
+
+* Photoautotrophic (algal)
+* Autotrophic (bacterial)
+* Heterotrophic (bacterial)
+
+Clear-water systems manage TAN-N primarily via the chemoautotrophic bacterial communities in contrast to biofloc systems where the dominant process is via heterotrophic pathways.
+
+Chemoautotrophic pathway (simplified) NH~4~^+^ + O~2~ + alkalinity &rarr; NO~2~^-^ &rarr; NO~3~^-^ + CO~2~ + small amount of bacterial biomass
+
+Heterotrophic pathway (simplified) NH~4~^+^ + O~2~ + alkalinity + organic C &rarr; large amount of bacterial biomass + CO~2~
+
+The carbon/ nitrogen ratio influences the relative proportion of autotrophic/ heterotrophic bacterial community and therefore may be used as a management tool for determination of nitrogen removal pathway.
+
+Stoichiometric equations predict that for every g of ammonia-nitrogen converted to microbial biomass (by heterotrophic bacteria), 15.17 g of carbohydrates or 6.07 g of organic carbon is consumed. Organic carbon can be made available from livestock feed constituents and supplementary carbohydrate additions e.g. molasses or other source.
+
+
+
+```{r nitrogenParameters}
+
+# component specifics
+media.area <- 750 # 750 m2/m3
+biomedia.volume.ratio <- 2
+biomedia.aeration.ratio <- 3
+
+# system rates
+nitrification.rate <- 0.4 # 0.4g TAN/m2/day
+skimmer.ratio <- 0.3
+
+
+# system efficiency 
+passive.nitrification <- 0.05 # 5% passive nitrification rate
+passive.denitrification <- 0.05 # 5% passive denitrification rate
+```
+
+``` {r tanLoading20}
+
+# get max and average tan loading for each system for the clearwater feeding scheme (overlapping batches where appropriate)
+tan.loading.20.cw <- system.parameters.20 %>%
+  group_by(system, facility.day) %>%
+  summarise(tan.sum = sum(total.tan.cw)) %>%
+  summarise(tan.max = max(tan.sum),
+            tan.avg = mean(tan.sum)) %>%
+  arrange(factor(system, levels = c("nursery_1", "growout_1", "growout_2"))) %>%
+  pivot_longer(c(tan.max:tan.avg), names_to = "tan.metric", values_to = "TAN", values_drop_na = TRUE) %>%
+  mutate(nitrate.exchange = TAN * 1e6 * (1 - passive.denitrification) / desired.nitrate / 1000, # exchange volume m3 to maintain nitrate levels 
+         available.tan = TAN * (1 - passive.nitrification) - (desired.tan / 1e6) * nitrate.exchange * 1000, # available tan after passive denitrification and water exchange
+         biofilter.exchange = abs(available.tan  * 1e6 / (tan.c2 - tan.c1) / metabolic.period / 1000),
+         biomedia.volume = available.tan / (nitrification.rate / 1000) / metabolic.period * 24 / media.area, # biomedia volume required m3
+         biofilter.volume = biomedia.volume * biomedia.volume.ratio,
+         biofilter.aeration = biomedia.aeration.ratio * biomedia.volume)
+```
+
+
+
+Table indicates facility TAN production, water exchange rate to maintain nitrate levels and biofilter specification for system specified for 200T annual production of 20g shrimp.
+
+``` {r tanLoading20cwTable, ft.align = "center"}
+
+tan.loading.20.cw %>%
+  select(-c(TAN, biofilter.volume)) %>%
+  flextable() %>%
+  set_header_labels(system = "System", tan.metric = "Metric", available.tan = "(A)TAN", nitrate.exchange = "(N)Exchange", biofilter.exchange = "Flow required", biomedia.volume = "Media Volume", biofilter.aeration = "Aeration") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("Nitrogen loading for clear-water system with 20g production plan, includes overlapping batches, exchange required m", as_sup("3"), "/day, available TAN kg/day, flow required m", as_sup("3"), "/h, media volumes m", as_sup("3"), " , aeration m", as_sup("3"), "/hr."),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+TAN-N is processed by microbial communities within the water column and therefore does not utilise biomedia (typically seen in clear-water RAS systems). The heterotrophic bacterial pathway does not result in the production of nitrate (the end product of chemoautotrophic bacterial pathway). Supplimentary organic carbon is required in a biofloc system to ensure that the heterotrophic bacterial community maintains dominance over the autotrophic bacteria - to maximise TAN-N removal and to minimise nitrate production. 
+
+``` {r CarbProfile20bf, fig.cap = "Theoretical daily supplimentary carbohydrate requirement (per system per batch - not subdivided by tank number).", fig.align = "center", fig.dim = c(8,3), dpi = 200}
+
+# plot carb requirement across batch run 95th st 2022
+system.carb.20 <- system.parameters.20 %>%
+  filter(batch == "lag.batch.0") %>%
+  ggplot(aes(batch_day, org.carbon.bf, color = system)) +
+  geom_line()+
+  scale_color_manual("", breaks = c("nursery_1", "growout_1", "growout_2"),
+                     values = c(system.cols),
+                     labels = c("Nursery 1", "Growout 1", "Growout 2")) +
+  labs(x = "Day", y = "Supplimentary carb (Kg/day)") + 
+  theme_minimal()
+
+system.carb.20
+```
+
+***
+
+## Solids Management
+
+Solids within the production process will be comprised of uneaten feed, faeces and bacterial biomass.
+
+The literature indicates a total suspended solids (TSS) concentration of 200-300 mg/l is typical within biofloc operation, and levels of up to 500 mg/l may be acceptable without reduction of welfare or growth of shrimp. 
+
+Solids concentration will increase in zero exchange systems and active management techniques may be required to maintain optimal levels of TSS.
+
+TSS accumulation can be modelled according to system management based on feed input for chemoautotrophic-managed nitrogen pathways or feed input and bacterial biomass synthesised for heterotrophic-managed nitrogen pathways.
+
+Generic biofloc solids profile as follows:  < 48 $\mu$m 53%, 48-100 $\mu$m 12%, > 100 $\mu$m 36%  
+Generic clearwater RAS solids profile (trout): < 40 $\mu$m 10%, 40-100 $\mu$m 40%, > 100 $\mu$m 50%
+
+Settling velocities (caveat - estimated specific gravity of waste particle 1050kg/m^3^, density of seawater at 30^o^C 1018 kg/m^3^):
+
+$$V = {2r^2 * g * (d_p - d_m)} \over {9 * \rho}$$
+48 $\mu$ `r format((9.81 * (48e-6)^2 * (1050 - 1018)) / (18 * 0.851e-3), scientific = FALSE, digits = 6)` m/s  
+75 $\mu$ `r format((9.81 * (75e-6)^2 * (1050 - 1018)) / (18 * 0.851e-3), scientific = FALSE, digits = 6)` m/s  
+100 $\mu$ `r format((9.81 * (100e-6)^2 * (1050 - 1018)) / (18 * 0.851e-3), scientific = FALSE, digits = 6)` m/s 
+
+Usually not practical to settle particles smaller than 100 $\mu$
+
+Specify settling tank diameter and depth according to flow rate required - aiming for 30% efficiency.
+
+$$\text{Percent Efficiency} = \text{Particle Settling Velocity m/s} \over \text{Settling Tank Flowrate m/s * 100}$$
+Clearwater RAS may ustilse drum filtration for solids management - calculations have been carried out under this assumption. 
+
+``` {r tssLoading20}
+
+# get max and average tan loading for each system for the clearwater feeding scheme (overlapping batches where appropriate)
+tss.loading.20.cw <- system.parameters.20 %>%
+  group_by(system, facility.day) %>%
+  summarise(tss.sum = sum(tss.cw)) %>%
+  summarise(tss.max = max(tss.sum),
+            tss.avg = mean(tss.sum)) %>%
+  arrange(factor(system, levels = c("nursery_1", "growout_1", "growout_2"))) %>%
+  pivot_longer(c(tss.max:tss.avg), names_to = "tss.metric", values_to = "TSS", values_drop_na = TRUE) %>%
+  mutate(required.flow = TSS / (tss.te * clearwater.tss / 1e6) / 24 / 1000,
+         discharge = TSS / 0.25  * 300 / 1000)
+```
+
+``` {r tssLoading20cwTable, ft.align = "center"}
+
+tss.loading.20.cw %>%
+  flextable() %>%
+  set_header_labels(system = "System", tan.metric = "Metric", TSS = "TSS", required.flow = "Required Flowrate", discharge = "Discharge") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("TSS loading for clear-water system with 20g production plan, includes overlapping batches, TSS (kg), required flow (m", as_sup("3"), "/hr), discharge (m", as_sup("3"), "/day)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+Typical solids management process for biofloc is conical settling tank - perform calculations once tank size is determined.
+
+## Oxygen
+
+Clear-water, oxygen typically delivered via oxygen saturation system (oxy-cone).
+
+Example calculation indicating flow-rate required if supply water delivered at a saturation level of `r oxygen.super.saturated` mg/l
+
+``` {r oxyLoading20}
+
+NTP.o2 <- 1.331 # kg/m3
+STP.O2 <- 1.429 # kg/m3
+
+# get max and average tan loading for each system for the clearwater feeding scheme (overlapping batches where appropriate)
+oxy.loading.20.cw <- system.parameters.20 %>%
+  group_by(system, facility.day) %>%
+  summarise(od.sum = sum(od.cw)) %>%
+  summarise(od.max = max(od.sum),
+            od.avg = mean(od.sum)) %>%
+  arrange(factor(system, levels = c("nursery_1", "growout_1", "growout_2"))) %>%
+  pivot_longer(c(od.max:od.avg), names_to = "od.metric", values_to = "od", values_drop_na = TRUE) %>%
+  mutate(required.flow = abs(od * 1e6 / (oxy.c2 - oxy.c1)) / 24 / 1000,
+         ntp = od / NTP.o2 * 1000 / 24 / 60,
+         stp = od / STP.O2 * 1000 / 24 / 60)
+```
+
+``` {r oxyLoading20cwTable, ft.align = "center"}
+
+oxy.loading.20.cw %>%
+  flextable() %>%
+  set_header_labels(system = "System", od.metric = "Metric", od = "OD", required.flow = "Required Flowrate", ntp = "NTP", stp = "STP") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("Oxy loading for clear-water system with 20g production plan, includes overlapping batches, OD (kg/day), required flow (m", as_sup("3"), "/hr), NTP (LPM), STP (LPM)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+## Rough summary of controling flowrate clear-water
+
+``` {r controlingFlowrate20cw}
+
+system.flows <- max.loading.20.cw %>%
+  mutate(tan.flow = abs(total.tan.cw * 1e6 / (tan.c2 - tan.c1) / metabolic.period / 1000),
+         co2.flow = abs(co2.cw * 1e6 / (co2.c2 - co2.c1) / 24 / 1000),
+         tss.flow = abs(tss.cw * 1e6 / (tss.c2 - tss.c1) / 24 / 1000),
+         oxy.flow = abs(od.cw * 1e6 / (oxy.c2 - oxy.c1) / 24 / 1000)) %>%
+  select(c(system, tan.flow, co2.flow, tss.flow, oxy.flow))
+```
+
+``` {r systemFlowsTable, ft.align = "center"}
+
+system.flows %>%
+  flextable() %>%
+  set_header_labels(system = "System", tan.flow = "TAN", co2.flow = "CO2", tss.flow = "TSS", oxy = "Oxygen") %>%
+  colformat_double(digits = 2) %>%
+  autofit() %>%
+  fit_to_width(7.5) %>% 
+  set_caption(caption = as_paragraph("Rough guide to controlling flowrates by parameter - total system circulation rate not individual tank flowrate (m", as_sup("3"), "/hr)"),
+              style = "Table Caption",
+              autonum = run_autonum(seq_id = "tab"))
+```
+
+
